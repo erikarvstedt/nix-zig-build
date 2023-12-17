@@ -1,0 +1,216 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# https://github.com/ziglang/zig/wiki/Contributing
+
+script_dir=$(cd "${BASH_SOURCE[0]%/*}" && pwd)
+args=("$@")
+
+#―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
+# Env vars that affect this script
+
+# Path to the Zig source repo
+src=${src:-/tmp/zig-src}
+
+# Path to the build directory
+build_dir=${build_dir:-/tmp/zig-build}
+
+#―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
+# All build/test functions in this script place the local zig-cache inside
+# $build_dir to avoid cluttering $src.
+#
+# All build functions are idempotent.
+
+#―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
+
+# Build Zig from source, using only a C compiler
+#
+# The resulting binary is located at $build_dir/stage3/bin/zig
+buildBootstrap() {
+    prepareBuild
+
+    ninja install
+
+    setGlibc "$build_dir/stage3/bin/zig"
+}
+
+# As a faster alternative to `buildBootstrap`, fetch a prebuilt Zig stage3 binary
+usePrebuilt() {
+    # This creates $build_dir/config.h, required for building Zig
+    prepareBuild
+    # This creates $build_dir/zigcpp/libzigcpp.a, required for building Zig
+    ninja zigcpp
+
+    nix build "$script_dir"#zigPrebuilt -o "$build_dir/stage3-prebuilt"
+    mkdir -p "$build_dir/stage3/bin"
+    ln -sfn "$(realpath "$build_dir/stage3-prebuilt")/bin/zig" "$build_dir/stage3/bin"
+}
+
+prepareBuild() {
+    mkdir -p "$build_dir/helper"
+
+    createAndEnterDevEnv
+
+    cd "$build_dir"
+    export ZIG_LOCAL_CACHE_DIR=$build_dir/zig-cache
+    cmake "$src" -DCMAKE_BUILD_TYPE=Release -DZIG_NO_LIB=ON -GNinja
+
+    # Required due to -DZIG_NO_LIB=ON, so that zig can find the stdlib
+    ln -sfn "$src/lib" "$build_dir/lib"
+}
+
+# - Set the correct dynamic linker (glibc's ld-linux) from the dev env.
+#   Zig uses the linker used in /usr/bin/env, which can have the wrong version.
+# - Add glibc to the RPATH.
+#   This is not needed for the dynamic linker to load the correct glibc version
+#   (because the linker uses the glibc directory in which the linker itself is located).
+#   But it fixes "wrong version" warnings for glibc in tools like `ldd`, which only use
+#   resources like RPATH for resolving shared libraries.
+setGlibc() {
+    binary=$1
+    patchelf --set-interpreter "$(cat "$NIX_BINTOOLS/nix-support/dynamic-linker")" \
+             --add-rpath "$(cat "$NIX_BINTOOLS/nix-support/orig-libc")/lib" \
+             "$binary"
+}
+
+#―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
+# Build Zig from source, using the the Zig binary built in `buildBootstrap`.
+
+buildDebug() {
+    build zig-debug "$@"
+}
+
+buildRelease() {
+    build zig-release -Doptimize=ReleaseFast -Dstrip "$@"
+}
+
+build() {
+    prefix=$1
+    shift
+
+    if [[ ! -e "$build_dir/stage3/bin/zig" ]]; then
+        echo '`stage3/bin/zig` does not exist. Run one of the following:'
+        echo 'run buildBootstrap'
+        echo 'run usePrebuilt'
+    fi
+
+    enterDevEnv
+
+    cd $src
+
+    config_h_arg=()
+    # Zig build searches `config.h` relative to the Zig binary location.
+    # If the Zig binary is in the Nix store (created via `usePrebuilt`),
+    # we must explicitly define the `config.h` location.
+    if [[ -L "$build_dir/stage3/bin/zig" ]]; then
+        config_h_arg=("-Dconfig_h=$build_dir/config.h")
+    fi
+
+    printAndRun "$build_dir"/stage3/bin/zig build --prefix "$build_dir/$prefix" \
+                --cache-dir "$build_dir/zig-cache" "${config_h_arg[@]}" -Denable-llvm -Dno-lib "$@"
+
+    setGlibc "$build_dir/$prefix/bin/zig"
+}
+
+#―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
+
+testStdlib() {
+    zigSrc build test-std -Dskip-release -Dskip-non-native "$@"
+}
+
+# Run stdlib tests just for the native CPU
+testStdlibFast() {
+    zigSrc test lib/std/std.zig --zig-lib-dir lib --main-mod-path lib/std "$@"
+}
+
+# Basic compiler tests
+testBehavior() {
+    zigSrc build test-behavior -Dskip-non-native "$@"
+}
+
+# Basic compiler tests, running just the default Debug configuration
+testBehaviorFast() {
+    zigSrc test test/behavior.zig -I test
+}
+
+zigSrc() {
+    cd $src
+    zigDebug "$@"
+}
+
+zigDebug() {
+    local cmd=$1
+    shift
+    printAndRun "$build_dir/zig-debug/bin/zig" "$cmd" --cache-dir "$build_dir/zig-cache" "$@"
+}
+
+#―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
+dev_env=$build_dir/helper/dev-env.sh
+dev_env_profile=$build_dir/helper/dev-env-profile
+
+# Run this script in the Nix dev env
+createAndEnterDevEnv() {
+    if [[ ${inZigDevEnv:-} != 1 ]]; then
+        # Cleanup profile links to only save a gcroot to the latest dev env
+        rm -f "$dev_env_profile"-*-link
+
+        mkdir -p "$build_dir/helper"
+
+        # Create dev env and save it in a profile to prevent garbage collection. This
+        # is important so that dynamic libraries linked by Zig don't disappear.
+        nix print-dev-env --profile "$dev_env_profile" "$script_dir" > "$dev_env"
+        runDevEnv
+    fi
+}
+
+# Run this script in the Nix dev env.
+# Reuses an existing dev env created by `createAndEnterDevEnv` for better performance.
+enterDevEnv() {
+    if [[ ${inZigDevEnv:-} != 1 ]]; then
+        if [[ -e "$dev_env" ]]; then
+            runDevEnv
+        else
+            createAndEnterDevEnv
+        fi
+    fi
+}
+
+runDevEnv() {
+    # Source dev env file instead of calling `nix develop`:
+    # - With warm caches and a clean Flake dir, this is 10x faster than `nix develop`.
+    #   `nix develop` introduces a slight but noticeable delay.
+    # - `nix develop` always evaluates `nixpkgs#bashInteractive`.
+    #    This forces a download of nixpkgs (and a reevaluation of `bashInteractive`) after
+    #    `tarball-ttl` (default: 1 h) which adds an unacceptable delay of many seconds.
+    . "$dev_env"
+    exec "${BASH_SOURCE[0]}" "${args[@]}"
+}
+
+# Eval a cmd in the dev env
+cmd() {
+    enterDevEnv
+    eval "$@"
+}
+
+printAndRun() {
+    printf "%q " "$@"; echo
+    eval "$@"
+}
+
+#―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
+
+case ${1:-} in
+    ''|h|help|-h|--help)
+        echo "See ./$(realpath --relative-to="$PWD" "$script_dir/usage.sh") for usage"
+        echo
+        echo "Info:"
+        echo "src:"
+        echo "$src"
+        echo
+        echo "build_dir:"
+        echo "$build_dir"
+        exit
+        ;;
+esac
+
+eval "$@"

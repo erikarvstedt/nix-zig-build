@@ -20,6 +20,12 @@ nix develop
 #
 # All build functions are idempotent.
 
+# You might want to use a wrapper script that sets these variables, like so:
+install -m755 <(echo '#!/usr/bin/env bash
+export src=<Your Zig src>
+export build_dir=<Your build dir>
+. /path/to/nix-zig-build/run.sh "$@"') ~/bin/zb
+
 ## 2.1 Clone Zig repo
 git clone https://github.com/ziglang/zig /tmp/zig-src
 

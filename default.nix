@@ -36,7 +36,7 @@ rec {
     # Zig's build looks at /usr/bin/env to detect the dynamic linker (ld-linux).
     # This path doesn't exist in the Nix build environment.
     postPatch = ''
-      substituteInPlace lib/std/zig/system/NativeTargetInfo.zig \
+      substituteInPlace lib/std/zig/system.zig \
         --replace "/usr/bin/env" "${coreutils}/bin/env"
     '';
 

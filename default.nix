@@ -110,6 +110,12 @@ rec {
     '';
   };
 
+  # Contains only `zig`, optimized for fast building
+  zigPrebuiltNoLib = pkgs.runCommand "zig-${release.version}" {} ''
+    mkdir $out
+    tar xfJ ${zigPrebuilt.src} -C $out --strip-components=1 --wildcards --no-wildcards-match-slash  '*/zig'
+  '';
+
   zigSystems = {
     x86_64-linux = "linux-x86_64";
     aarch64_linux = "linux-aarch64";

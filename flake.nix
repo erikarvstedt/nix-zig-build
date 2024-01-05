@@ -18,6 +18,7 @@
           inherit (contents)
             zig
             zigPrebuilt
+            zigPrebuiltNoLib
             bootstrapEnv;
           default = zig;
         };

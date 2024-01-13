@@ -10,7 +10,6 @@ nix develop
 
 #―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
 # 2. Build Zig from src (with ./run)
-
 # ./run is an opinionated script that helps with building and testing Zig.
 ./run --help
 
@@ -18,8 +17,6 @@ nix develop
 # - src (default: /tmp/zig-src)
 # - build_dir (default: /tmp/zig-build)
 #
-# All build functions are idempotent.
-
 # You might want to use a wrapper script that sets these variables, like so:
 install -m755 <(echo '#!/usr/bin/env bash
 export src=<Your Zig src>
@@ -30,6 +27,8 @@ export build_dir=<Your build dir>
 git clone https://github.com/ziglang/zig /tmp/zig-src
 
 ## 2.2
+# Note: All ./run functions used here are idempotent.
+
 # Build Zig from source (with optimize=ReleaseFast), using only a C compiler.
 # This cmd automatically runs within the dev shell.
 ./run buildBootstrap

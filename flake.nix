@@ -13,14 +13,14 @@
       let
         pkgs = nixpkgs.legacyPackages.${system};
         contents = import ./default.nix pkgs;
-      in rec {
-        packages = rec {
+      in {
+        packages = {
+          default = contents.zig;
           inherit (contents)
             zig
             zigPrebuilt
             zigPrebuiltNoLib
             bootstrapEnv;
-          default = zig;
         };
 
         devShells.default = contents.devShell;

@@ -143,7 +143,12 @@ fi
 # Create commit and push to upstream
 if [[ $dry_run ]]; then
     git checkout HEAD -- ../zig-release.nix
-elif [[ $push ]]; then
-     git commit -m "update to Zig \`$master_version\` [auto]"
-     git push upstream master
+else
+    commit_msg="update to Zig \`$master_version\`"
+    if [[ $push ]]; then
+        git commit -m "$commit_msg [auto]"
+        git push upstream master
+    else
+        echo "$commit_msg"
+    fi
 fi

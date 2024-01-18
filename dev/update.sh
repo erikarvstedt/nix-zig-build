@@ -69,6 +69,9 @@ if [[ $push ]]; then
         echo 'Error: Branch `master` is currently not checked out'
         exit 1
     fi
+    if [[ ! $dry_run ]]; then
+        git checkout HEAD -- ../zig-release.nix
+    fi
     if ! git diff-index --quiet HEAD; then
         echo 'Error: This repo has uncommitted changes'
         exit 1

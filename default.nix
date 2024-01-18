@@ -47,6 +47,7 @@ rec {
     buildInputs = with pkgs; [
       libxml2
       zlib
+      libgcc.lib
     ] ++ (with llvmPackages; [
       libclang
       lld

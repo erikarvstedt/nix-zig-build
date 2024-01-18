@@ -31,7 +31,7 @@ buildBootstrap() {
 
     ninja install
 
-    setGlibc "$build_dir/stage3/bin/zig"
+    fixDynamicLinking "$build_dir/stage3/bin/zig"
 }
 
 # As a faster alternative to `buildBootstrap`, fetch a prebuilt Zig stage3 binary
@@ -67,8 +67,10 @@ prepareBuild() {
 #   (because the linker uses the glibc directory in which the linker itself is located).
 #   But it fixes "wrong version" warnings for glibc in tools like `ldd`, which only use
 #   resources like RPATH for resolving shared libraries.
-setGlibc() {
+fixDynamicLinking() {
     binary=$1
+    patchelf --shrink-rpath \
+             "$binary"
     patchelf --set-interpreter "$(cat "$NIX_BINTOOLS/nix-support/dynamic-linker")" \
              --add-rpath "$(cat "$NIX_BINTOOLS/nix-support/orig-libc")/lib" \
              "$binary"
@@ -102,7 +104,7 @@ build() {
     printAndRun "$build_dir"/stage3/bin/zig build --prefix "$build_dir/$prefix" \
                 --cache-dir "$build_dir/zig-cache" -Denable-llvm -Dno-lib "$@"
 
-    setGlibc "$build_dir/$prefix/bin/zig"
+    fixDynamicLinking "$build_dir/$prefix/bin/zig"
 }
 
 #―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――

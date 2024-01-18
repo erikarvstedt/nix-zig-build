@@ -50,7 +50,7 @@ usePrebuilt() {
 prepareBuild() {
     mkdir -p "$build_dir/helper"
 
-    createAndEnterDevEnv
+    enterDevEnv
 
     cd "$build_dir"
     export ZIG_LOCAL_CACHE_DIR=$build_dir/zig-cache
@@ -140,10 +140,16 @@ zigDebug() {
 #―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
 dev_env=$build_dir/helper/dev-env.sh
 dev_env_profile=$build_dir/helper/dev-env-profile
+dev_env_src_hash_file=$build_dir/helper/dev-env-src-hash
 
 # Run this script in the Nix dev env
-createAndEnterDevEnv() {
-    if [[ ${inZigDevEnv:-} != 1 ]]; then
+enterDevEnv() {
+    if [[ ${inZigDevEnv:-} == 1 ]]; then return; fi
+
+    src_hash=$(cd $script_dir; sha256sum default.nix flake.lock)
+    if [[ ! -e $dev_env || $src_hash != $(cat "$dev_env_src_hash_file" 2>/dev/null || :) ]]; then
+        # Create dev env
+
         # Cleanup profile links to only save a gcroot to the latest dev env
         rm -f "$dev_env_profile"-*-link
 
@@ -152,23 +158,10 @@ createAndEnterDevEnv() {
         # Create dev env and save it in a profile to prevent garbage collection. This
         # is important so that dynamic libraries linked by Zig don't disappear.
         nix print-dev-env --profile "$dev_env_profile" "$script_dir" > "$dev_env"
-        runDevEnv
-    fi
-}
 
-# Run this script in the Nix dev env.
-# Reuses an existing dev env created by `createAndEnterDevEnv` for better performance.
-enterDevEnv() {
-    if [[ ${inZigDevEnv:-} != 1 ]]; then
-        if [[ -e "$dev_env" ]]; then
-            runDevEnv
-        else
-            createAndEnterDevEnv
-        fi
+        echo "$src_hash" > "$dev_env_src_hash_file"
     fi
-}
 
-runDevEnv() {
     # Source dev env file instead of calling `nix develop`:
     # - With warm caches and a clean Flake dir, this is 10x faster than `nix develop`.
     #   `nix develop` introduces a slight but noticeable delay.

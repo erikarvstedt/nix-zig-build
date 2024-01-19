@@ -1,11 +1,9 @@
 pkgs:
 
 rec {
-  llvmPackages = pkgs.llvmPackages_17;
-
   release = import ./zig-release.nix;
 
-  zig = pkgs.callPackage ./zig.nix { inherit llvmPackages release; };
+  zig = pkgs.callPackage ./zig.nix { inherit release; };
 
   devShell = pkgs.mkShell {
     nativeBuildInputs = zig.nativeBuildInputs ++ (with pkgs; [

@@ -3,13 +3,16 @@
 , fetchFromGitHub
 , cmake
 , coreutils
-, llvmPackages
+, llvmPackages_17
 , libgcc
 , libxml2
 , zlib
 , release
 }:
 
+let
+  llvmPackages = llvmPackages_17;
+in
 stdenv.mkDerivation (finalAttrs: {
   pname = "zig";
   inherit (release) version;

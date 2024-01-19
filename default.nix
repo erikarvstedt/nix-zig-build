@@ -45,9 +45,9 @@ rec {
     ];
 
     buildInputs = with pkgs; [
+      libgcc.lib # Work around https://github.com/ziglang/zig/issues/18612 (libstdc++.so not found in rpath)
       libxml2
       zlib
-      libgcc.lib
     ] ++ (with llvmPackages; [
       libclang
       lld
@@ -85,6 +85,17 @@ rec {
 
       runHook postInstallCheck
     '';
+
+    passthru = { inherit llvmPackages; };
+
+    meta = {
+      description = "General-purpose programming language and toolchain for maintaining robust, optimal, and reusable software";
+      homepage = "https://ziglang.org/";
+      changelog = "https://ziglang.org/download/${finalAttrs.version}/release-notes.html";
+      license = pkgs.lib.licenses.mit;
+      mainProgram = "zig";
+      platforms = pkgs.lib.platforms.unix;
+    };
   });
 
   zigPrebuilt = pkgs.stdenv.mkDerivation {

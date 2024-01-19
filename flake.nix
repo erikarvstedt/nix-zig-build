@@ -12,17 +12,17 @@
     flake-utils.lib.eachSystem systems (system:
       let
         pkgs = nixpkgs.legacyPackages.${system};
-        contents = import ./default.nix pkgs;
+        outputs = import ./outputs.nix pkgs;
       in {
         packages = {
-          default = contents.zig;
-          inherit (contents)
+          default = outputs.zig;
+          inherit (outputs)
             zig
             zigPrebuilt
             zigPrebuiltNoLib
             bootstrapEnv;
         };
 
-        devShells.default = contents.devShell;
+        devShells.default = outputs.devShell;
       });
 }

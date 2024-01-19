@@ -148,7 +148,7 @@ dev_env_src_hash_file=$build_dir/helper/dev-env-src-hash
 enterDevEnv() {
     if [[ ${inZigDevEnv:-} == 1 ]]; then return; fi
 
-    src_hash=$(cd $script_dir; sha256sum default.nix flake.lock)
+    src_hash=$(cd $script_dir; sha256sum zig.nix outputs.nix flake.lock)
     if [[ ! -e $dev_env || $src_hash != $(cat "$dev_env_src_hash_file" 2>/dev/null || :) ]]; then
         # Create dev env
 

@@ -41,10 +41,10 @@ usePrebuilt() {
     # This creates $build_dir/zigcpp/libzigcpp.a, required for building Zig
     ninja zigcpp
 
-    nix build "$script_dir"#zigPrebuiltNoLib -o "$build_dir/stage3-prebuilt"
+    nix build "$script_dir"#zigPrebuiltNoLib -o "$build_dir/helper/stage3-prebuilt"
     # Copy instead of symlinking so that the Zig binary automatically picks up
     # the Zig lib dir and `config.h` in $build_dir
-    install -D -T --compare "$build_dir/stage3-prebuilt/zig" "$build_dir/stage3/bin/zig"
+    install -D -T --compare "$build_dir/helper/stage3-prebuilt/zig" "$build_dir/stage3/bin/zig"
 }
 
 prepareBuild() {

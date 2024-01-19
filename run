@@ -159,7 +159,10 @@ enterDevEnv() {
 
         # Create dev env and save it in a profile to prevent garbage collection. This
         # is important so that dynamic libraries linked by Zig don't disappear.
-        nix print-dev-env --profile "$dev_env_profile" "$script_dir" > "$dev_env"
+        # Use sed to remove `NIX_BUILD_TOP` and tmpdir aliases to `NIX_BUILD_TOP`, so that no
+        # tmpdir is created each time the the dev env is sourced.
+        nix print-dev-env --profile "$dev_env_profile" "$script_dir" |
+            sed -E '/^export (NIX_BUILD_TOP=|\S+=.*?NIX_BUILD_TOP)/d' > "$dev_env"
 
         echo "$src_hash" > "$dev_env_src_hash_file"
     fi

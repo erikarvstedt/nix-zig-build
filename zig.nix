@@ -65,7 +65,9 @@ stdenv.mkDerivation (finalAttrs: {
   # This setting has no effect on the final Zig binary (stage3).
   hardeningDisable = [ "all" ];
 
-  env.ZIG_GLOBAL_CACHE_DIR = "$TMP/zig-cache";
+  preConfigure = ''
+    export ZIG_GLOBAL_CACHE_DIR=$TMP/zig-cache;
+  '';
 
   doInstallCheck = true;
   installCheckPhase = ''

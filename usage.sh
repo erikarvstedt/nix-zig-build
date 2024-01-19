@@ -71,7 +71,7 @@ nix build --no-link --print-out-paths -L .#zigPrebuilt
 git clone --depth 1 https://github.com/ziglang/zig-bootstrap /tmp/zig-bootstrap
 # Enter bootstrap shell
 nix shell .#zigBootstrap
-cd zig-bootstrap
+cd /tmp/zig-bootstrap
 export CMAKE_GENERATOR=Ninja
 ./build x86_64-linux-musl baseline
 

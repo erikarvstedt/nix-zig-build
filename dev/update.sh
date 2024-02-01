@@ -44,6 +44,9 @@ master_rev=$(
          "https://api.github.com/repos/ziglang/zig/commits/$master_rev_short?per_page=1" \
         | jq -r .sha
 )
+if [[ $push && ! $dry_run ]]; then
+    git checkout HEAD -- ../zig-release.nix
+fi
 current_rev=$(nix eval --raw -f ../zig-release.nix src.rev)
 
 if [[ $master_rev == $current_rev ]]; then
@@ -68,9 +71,6 @@ if [[ $push ]]; then
     if [[ $(git rev-parse --abbrev-ref HEAD) != master ]]; then
         echo 'Error: Branch `master` is currently not checked out'
         exit 1
-    fi
-    if [[ ! $dry_run ]]; then
-        git checkout HEAD -- ../zig-release.nix
     fi
     if ! git diff-index --quiet HEAD; then
         echo 'Error: This repo has uncommitted changes'

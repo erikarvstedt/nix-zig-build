@@ -33,4 +33,5 @@ See [`./dev/README.md`](./dev/README.md) on how to develop and contribute to thi
 
 ### See also
 
-[zig-overlay](https://github.com/mitchellh/zig-overlay), which packages the official prebuilt static Zig binaries with Nix.
+[zig-overlay](https://github.com/mitchellh/zig-overlay), which packages the official prebuilt static Zig binaries with Nix. \
+[zig2nix](https://github.com/Cloudef/zig2nix/), Flake for packaging, building and running Zig projects.

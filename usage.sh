@@ -55,7 +55,7 @@ git clone https://github.com/ziglang/zig /tmp/zig-src
 ./run testBehaviorFast
 ./run zigSrc build --help # Show Zig build options for the Zig repo
 
-# For more cmds, see ./run
+# For more cmds, see the src of ./run
 
 #―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
 # 3. Build the Zig pkgs

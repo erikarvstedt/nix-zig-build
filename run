@@ -31,7 +31,7 @@ buildBootstrap() {
 
     ninja install
 
-    fixDynamicLinking "$build_dir/stage3/bin/zig"
+    patchElf "$build_dir/stage3/bin/zig"
 }
 
 # As a faster alternative to `buildBootstrap`, fetch a prebuilt Zig stage3 binary
@@ -54,28 +54,19 @@ prepareBuild() {
 
     cd "$build_dir"
     export ZIG_LOCAL_CACHE_DIR=$build_dir/zig-cache
-    cmake "$src" -DCMAKE_BUILD_TYPE=Release -DZIG_NO_LIB=ON -GNinja
+    cmake "$src" -GNinja \
+          -DCMAKE_BUILD_TYPE=Release \
+          -DZIG_NO_LIB=ON \
+          -DZIG_TARGET_DYNAMIC_LINKER="$(cat "$NIX_BINTOOLS/nix-support/dynamic-linker")"
 
     # Required due to -DZIG_NO_LIB=ON, so that zig can find the stdlib
     ln -sfn "$src/lib" "$build_dir/lib"
 }
 
-# - Set the correct dynamic linker (glibc's ld-linux) from the dev env.
-#   Zig uses the linker used in /usr/bin/env, which can have the wrong version.
-# - Add glibc to the RPATH.
-#   This is not needed for the dynamic linker to load the correct glibc version
-#   (because the linker uses the glibc directory in which the linker itself is located).
-#   But it fixes "wrong version" warnings for glibc in tools like `ldd`, which only use
-#   resources like RPATH for resolving shared libraries.
-fixDynamicLinking() {
+patchElf() {
     binary=$1
-    patchelf --shrink-rpath \
-             "$binary"
-    patchelf --set-interpreter "$(cat "$NIX_BINTOOLS/nix-support/dynamic-linker")" \
-             --add-rpath "$(cat "$NIX_BINTOOLS/nix-support/orig-libc")/lib" \
-             "$binary"
+    patchelf --shrink-rpath "$binary"
 }
-
 #―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
 # Build Zig from source, using the the Zig binary built in `buildBootstrap`.
 
@@ -104,7 +95,7 @@ build() {
     printAndRun "$build_dir"/stage3/bin/zig build --prefix "$build_dir/$prefix" \
                 --cache-dir "$build_dir/zig-cache" -Denable-llvm -Dno-lib "$@"
 
-    fixDynamicLinking "$build_dir/$prefix/bin/zig"
+    patchElf "$build_dir/$prefix/bin/zig"
 }
 
 #―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――

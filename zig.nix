@@ -24,13 +24,6 @@ stdenv.mkDerivation (finalAttrs: {
     hash = release.src.hash;
   };
 
-  # Zig's build looks at /usr/bin/env to detect the dynamic linker (ld-linux).
-  # This path doesn't exist in the Nix build environment.
-  postPatch = ''
-      substituteInPlace lib/std/zig/system.zig \
-        --replace "/usr/bin/env" "${coreutils}/bin/env"
-    '';
-
   nativeBuildInputs = [
     cmake
   ];
@@ -52,6 +45,8 @@ stdenv.mkDerivation (finalAttrs: {
     "-DZIG_TARGET_MCPU=baseline"
     # To optimize for recent x86_64 CPUs, you can set the following:
     # "-DZIG_TARGET_MCPU=x86_64_v4"
+
+    "-DZIG_TARGET_DYNAMIC_LINKER=${stdenv.cc.bintools.dynamicLinker}"
 
     ## Other useful options
     #

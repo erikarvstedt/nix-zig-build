@@ -63,7 +63,7 @@ prepareBuild() {
     ln -sfn "$src/lib" "$build_dir/lib"
 }
 
-fixDynamicLinking() {
+patchElf() {
     binary=$1
     patchelf --shrink-rpath "$binary"
     # patchelf --add-rpath "$(cat "$NIX_BINTOOLS/nix-support/orig-libc")/lib" "$binary"

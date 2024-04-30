@@ -63,10 +63,12 @@ prepareBuild() {
     ln -sfn "$src/lib" "$build_dir/lib"
 }
 
-patchElf() {
+fixDynamicLinking() {
     binary=$1
     patchelf --shrink-rpath "$binary"
+    # patchelf --add-rpath "$(cat "$NIX_BINTOOLS/nix-support/orig-libc")/lib" "$binary"
 }
+
 #―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
 # Build Zig from source, using the the Zig binary built in `buildBootstrap`.
 

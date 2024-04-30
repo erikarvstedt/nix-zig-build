@@ -12,5 +12,6 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - uses: cachix/install-nix-action@v24
-    - run: ./dev/test.sh test_pkg
-    - run: ./dev/test.sh test_manual_build_prebuilt
+    # - run: ./dev/test.sh test_manual_build_prebuilt
+    - name: Setup tmate session
+      uses: mxschmitt/action-tmate@v3

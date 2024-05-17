@@ -5,7 +5,6 @@
 nix develop
 
 # You can now follow the build instructions from the Wiki
-# https://github.com/ziglang/zig/wiki/Development-with-nix
 # https://github.com/ziglang/zig/wiki/Building-Zig-From-Source
 
 #―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――

@@ -6,6 +6,8 @@
 , llvmPackages_18
 , libgcc
 , libxml2
+, xz
+, icu
 , zlib
 , release
 }:
@@ -39,11 +41,15 @@ stdenv.mkDerivation (finalAttrs: {
     libgcc.lib # Work around https://github.com/ziglang/zig/issues/18612 (libstdc++.so not found in rpath)
     libxml2
     zlib
+    xz
+    icu
   ] ++ (with llvmPackages; [
     libclang
     lld
     llvm
   ]);
+
+  LD_LIBRARY_PATH = lib.makeLibraryPath [ xz icu ];
 
   cmakeFlags = [
     # This ensures that the resulting zig binary

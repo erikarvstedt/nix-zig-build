@@ -34,7 +34,7 @@ git clone https://github.com/ziglang/zig /tmp/zig-src
 # Run Zig created by `buildBootstrap`
 ./run 'eval $build_dir/stage3/bin/zig help'
 
-# Alternatively, use a pre-built Zig release binary from ziglang.org.
+# Alternatively, use a pre-built, signature-checked Zig release binary from ziglang.org.
 # This is much faster than running a bootstrap build.
 ./run usePrebuilt
 # Run Zig created by `usePrebuilt`

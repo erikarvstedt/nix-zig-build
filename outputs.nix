@@ -53,15 +53,14 @@ rec {
     aarch64_linux = "linux-aarch64";
   };
 
-  bootstrapEnv =
-    pkgs.symlinkJoin {
-      name = "zig-bootstrap";
-      paths = with pkgs; [
-        gcc
-        cmake
-        ninja
-        python3
-      ];
-      preferLocalBuild = true;
-    };
+  bootstrapEnv = pkgs.symlinkJoin {
+    name = "zig-bootstrap";
+    paths = with pkgs; [
+      gcc
+      cmake
+      ninja
+      python3
+    ];
+    preferLocalBuild = true;
+  };
 }

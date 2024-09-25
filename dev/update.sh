@@ -108,7 +108,7 @@ fi
 # Update ../zig-release.nix
 
 echo "Getting Nix content hash of Zig src"
-master_hash=$(nix hash convert --algo sha256 "$(
+master_hash=$(nix hash convert --hash-algo sha256 "$(
   nix-prefetch-url --unpack "https://github.com/ziglang/zig/archive/$master_rev.tar.gz" 2>/dev/null
 )")
 x86_64_sha256=$(echo "$index_json" | jq -r '.master."x86_64-linux".shasum');

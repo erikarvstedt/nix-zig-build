@@ -3,7 +3,7 @@
 , fetchFromGitHub
 , cmake
 , coreutils
-, llvmPackages_19
+, llvmPackages_20
 , libgcc
 , libxml2
 , zlib
@@ -11,7 +11,7 @@
 }:
 
 let
-  llvmPackages = llvmPackages_19;
+  llvmPackages = llvmPackages_20;
 in
 stdenv.mkDerivation (finalAttrs: {
   pname = "zig";

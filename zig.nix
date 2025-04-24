@@ -53,6 +53,10 @@ stdenv.mkDerivation (finalAttrs: {
     # To optimize for recent x86_64 CPUs, you can set the following:
     # "-DZIG_TARGET_MCPU=x86_64_v4"
 
+    # Otherwise the Zig version is set to `major.minor.patch` without a possible `-dev` suffix,
+    # causing ZLS to not resolve a build runner.
+    "-DZIG_VERSION=${finalAttrs.version}"
+
     ## Other useful options
     #
     # Statically link LLVM

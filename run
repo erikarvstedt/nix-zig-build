@@ -69,11 +69,15 @@ prepareBuild() {
 #   resources like RPATH for resolving shared libraries.
 fixDynamicLinking() {
     binary=$1
-    patchelf --shrink-rpath \
-             "$binary"
-    patchelf --set-interpreter "$(cat "$NIX_BINTOOLS/nix-support/dynamic-linker")" \
-             --add-rpath "$(cat "$NIX_BINTOOLS/nix-support/orig-libc")/lib" \
-             "$binary"
+    patchelf --shrink-rpath "$binary"
+
+    # patchelf segfaults when used with binaries created by the zig selfhosted backend,
+    # so skip it in this case
+    if ! readelf -p .comment "$binary" | grep -q zig; then
+        patchelf --set-interpreter "$(cat "$NIX_BINTOOLS/nix-support/dynamic-linker")" \
+                 --add-rpath "$(cat "$NIX_BINTOOLS/nix-support/orig-libc")/lib" \
+                 "$binary"
+    fi
 }
 
 #―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――

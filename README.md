@@ -14,7 +14,7 @@ A Nix Flake for developing Zig.
   ./run testBehavior # Run behavior tests for the debug build
   ```
   Getting from zero to a self-built Zig is really fast: \
-  `./run usePrebuilt && ./run buildDebug` takes less than 3 minutes on an average desktop system.
+  `./run usePrebuilt && ./run buildDebug` takes less than 2 minutes on an average desktop system.
 - Zig `master` pkgs
   ```bash
   nix build .#zig # Built from source

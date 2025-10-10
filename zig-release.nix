@@ -1,11 +1,11 @@
 {
-  version = "0.16.0-dev.660+27aba2d77";
+  version = "0.16.0-dev.683+60a332406";
   src = {
-    rev = "27aba2d776caf59bb6569934626af587fdba9c75";
-    hash = "sha256-6K1QTUc4iRPNkNtfDwE0xxMaKvv9Awx+M04dvbMncg0=";
+    rev = "60a332406c10be922568e11dcc5144bb0f2d7a85";
+    hash = "sha256-hcE12me8BPidIzgSzfpklRcdXjXXIZmqMJQ7o+D0NWM=";
   };
   binaries = {
-    x86_64-linux.sha256 = "6b89c1f6202ce4578e8dc58c872ade49e9249fa6dd2a5829ee118a2da46d55f3";
-    aarch64-linux.sha256 = "5501092c362548cf01b35cbd6194ff3b13e44637e352de09b5461ead3998e7f2";
+    x86_64-linux.sha256 = "13ad1b5e31986c12ec107e069c35dfd07d349ffad5c673f862906b0f247a350c";
+    aarch64-linux.sha256 = "e95753c7dc25d3aef49bded67430d9afc0b74f2ba2385c3857cb1b042555d111";
   };
 }

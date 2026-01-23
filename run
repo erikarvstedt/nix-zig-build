@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# https://github.com/ziglang/zig/wiki/Contributing
+# https://codeberg.org/ziglang/zig#contributing
 
 script_dir=$(cd "${BASH_SOURCE[0]%/*}" && pwd)
 args=("$@")

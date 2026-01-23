@@ -40,8 +40,7 @@ index_json=$(curl -fsS 'https://ziglang.org/download/index.json')
 master_version=$(echo "$index_json" | jq -r .master.version)
 master_rev_short=${master_version##*+}
 master_rev=$(
-    curl -fsS -L -H "X-GitHub-Api-Version: 2022-11-28" \
-         "https://api.github.com/repos/ziglang/zig/commits/$master_rev_short?per_page=1" \
+    curl -fsS -L "https://codeberg.org/api/v1/repos/ziglang/zig/commits/$master_rev_short/status" \
         | jq -r .sha
 )
 if [[ $push && ! $dry_run ]]; then
@@ -109,7 +108,7 @@ fi
 
 echo "Getting Nix content hash of Zig src"
 master_hash=$(nix hash convert --hash-algo sha256 "$(
-  nix-prefetch-url --unpack "https://github.com/ziglang/zig/archive/$master_rev.tar.gz" 2>/dev/null
+  nix-prefetch-url --unpack "https://codeberg.org/ziglang/zig/archive/$master_rev.tar.gz" 2>/dev/null
 )")
 x86_64_sha256=$(echo "$index_json" | jq -r '.master."x86_64-linux".shasum');
 aarch64_sha256=$(echo "$index_json" | jq -r '.master."aarch64-linux".shasum');

@@ -5,7 +5,7 @@
 nix develop
 
 # You can now follow the build instructions from the Wiki
-# https://github.com/ziglang/zig/wiki/Building-Zig-From-Source
+# https://codeberg.org/ziglang/zig#building-from-source
 
 #―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
 # 2. Build Zig from src (with ./run)
@@ -23,7 +23,7 @@ export build_dir=<Your build dir>
 . /path/to/nix-zig-build/run.sh "$@"') ~/bin/zb
 
 ## 2.1 Clone Zig repo
-git clone https://github.com/ziglang/zig /tmp/zig-src
+git clone https://codeberg.org/ziglang/zig /tmp/zig-src
 
 ## 2.2
 # Note: All ./run functions used here are idempotent.
@@ -67,7 +67,7 @@ nix build --no-link --print-out-paths -L .#zigPrebuilt
 # 4. Build Zig as a statically linked executable
 # This requires musl and is best achieved using zig-bootstrap.
 
-git clone --depth 1 https://github.com/ziglang/zig-bootstrap /tmp/zig-bootstrap
+git clone --depth 1 https://codeberg.org/ziglang/zig-bootstrap /tmp/zig-bootstrap
 # Enter bootstrap shell
 nix shell .#bootstrapEnv
 cd /tmp/zig-bootstrap

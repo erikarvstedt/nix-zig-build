@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -euo pipefail
+set -Eeuo pipefail
 . "${BASH_SOURCE[0]%/*}/run-in-nix-env" "curl git minisign" "$@"
 
 trap 'echo "Error at ${BASH_SOURCE[0]}:$LINENO"' ERR

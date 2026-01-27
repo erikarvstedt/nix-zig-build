@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -euo pipefail
+set -Eeuo pipefail
 
 trap 'echo "Error at ${BASH_SOURCE[0]}:$LINENO"' ERR
 

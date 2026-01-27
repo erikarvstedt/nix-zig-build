@@ -9,8 +9,11 @@ zig_pubkey="RWSGOq2NVecA2UPNdBUZykf1CCb147pkmdtYxgb3Ti+JO/wCYvhbAb/U"
 
 dry_run=
 test_all=
+test_cmd=
 push=
-for arg in "$@"; do
+while [[ $# > 0 ]]; do
+    arg="$1"
+    shift
     case "$arg" in
         # Don't make any persistent changes
         --dry-run|-n)
@@ -18,6 +21,11 @@ for arg in "$@"; do
             ;;
         --test-all|-t)
             test_all=1
+            ;;
+        # A custom test cmd to run
+        --test-cmd)
+            test_cmd=$1
+            shift
             ;;
         # Create a commit and push to upstream
         --push|-p)
@@ -132,7 +140,9 @@ fi
 #―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
 # Test Zig build
 echo "Running test"
-if [[ $test_all ]]; then
+if [[ $test_cmd ]]; then
+    eval "$test_cmd"
+elif [[ $test_all ]]; then
     ./test.sh test_all
 else
     ./test.sh test_pkg
